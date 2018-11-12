@@ -115,7 +115,11 @@
 			async function select(item){
 				let query = await axios.post(`https://asterisk.svo.kz/dom/getinf`);
 				if(item=='app'){
-					return query.data.app;
+					var result = [];
+					for(var i=0; i<query.data.app.length; i++){
+						result.unshift(query.data.app[i]);
+					}
+					return result
 				} else if(item=='app_status'){
 					return query.data.app_status;
 				} else if(item=='masters'){
@@ -156,7 +160,6 @@
 				return result
 			},
 			pName(item){
-				console.log(this.breakage)
 				var result = 0;
 				for(var i=0; i<this.breakage.length; i++){
 					if(item==this.breakage[i].id){
