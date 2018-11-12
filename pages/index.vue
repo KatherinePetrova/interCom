@@ -17,13 +17,13 @@
 				</select>
 				<label class="new">Мастер</label>
 				<select class="new" v-model="new_app.data.masterid" required>
-					<option v-for="item in masters" :value="item.id">{{item.name}}</option>
+					<option v-for="item in masters" v-if="item.status==1" :value="item.id">{{item.name}}</option>
 				</select>
 				<input type="submit" class="sub">
 			</form>
 		</div>
 		</transition>
-		<div class="left" v-bind:class="{blure: new_app.open}">
+		<div class="left">
 			<div class="left_pad" style="background-image: url('/message.png'); background-position: center; background-size: contain;" v-bind:class="{lp_picked: table==0}" @click="table=0" title="Заявки">
 			</div>
 			<div class="left_pad" style="background-image: url('/people.png'); background-position: center; background-size: contain;" v-bind:class="{lp_picked: table==1}" @click="table=1" title="Мастера">
