@@ -1,5 +1,6 @@
 <template>
-	<div class="main">
+	<div>
+	<div class="main" v-if="authed">
 		<transition name="fade">
 		<div class="new" v-if="new_app.open==true">
 			<form class="new" v-on:submit.prevent="send_app">
@@ -30,7 +31,7 @@
 			</div>
 			<div class="left_pad" style="background-image: url('/add.png'); background-position: center; background-size: contain;" @click="new_app.open=true" title="Новая заявка">
 			</div>
-			<div class="left_pad turn">
+			<div class="left_pad turn" @click="logout()">
 			</div>
 		</div>
 		<div class="right" v-if="table==0" v-bind:class="{blure: new_app.open}">
@@ -101,10 +102,16 @@
 					Свободен
 				</div>
 				<div class="col" v-else-if="item.acceptance==0">
-					Не принят
+					<div class="accept" @click="accept(item, true)">Принять</div>
+					<div class="accept dec" @click="accept(item, false)">Отклонить</div>
 				</div>
 			</div>
 		</div>
+	</div>
+	<div class="main" style="justify-content: center; align-items: center; flex-direction: column;"v-else>
+		Вы не авторизованы
+		<nuxt-link to="/">Перейти на страницу авторизации</nuxt-link>
+	</div>
 	</div>
 </template>
 
@@ -138,11 +145,51 @@
 				new_app: {
 					open: false,
 					data: {}
-				}
+				},
+				authed: false
 			}
 
 		},
 		methods: {
+			async accept(item, bol){
+				if(bol){
+					item.acceptance = 1;
+					try{
+						var query = await axios.post('https://asterisk.svo.kz/dom/master_accept', item);
+						if(query.status==200){
+							for(var i=0; i<this.masters.length; i++){
+								if(item.id==this.masters[i].id){
+									this.masters[i].acceptance = 1;
+								}
+							}
+						}
+					} catch(e){
+						alert('Ошибка');
+					}
+				} else {
+					try{
+						var query = await axios.post('https://asterisk.svo.kz/dom/master_accept', item);
+						if(query.status==200){
+							alert('Успех')
+						}
+					} catch(e){
+						alert('Ошибка');
+					}
+				}
+			},
+			async check(){
+				try{
+					var query = await axios.post('https://asterisk.svo.kz/dom/check', {token: this.$cookies.get('token')});
+					this.authed = true;
+					this.message = query.data;
+				} catch(e){
+					this.authed = false;
+				}
+			},
+			logout(){
+				this.$cookies.set('token', '')
+				this.$router.push('/')
+			},
 			masterName(item){
 				for(var i=0; i<this.masters.length; i++){
 					if(item==this.masters[i].id){
@@ -244,7 +291,7 @@
 			}
 		},
 		mounted(){
-
+			this.check()
 		}
 	}
 </script>
@@ -259,6 +306,25 @@
 		opacity: 0;
 	}
 
+	.accept {
+		width: 50%;
+		min-height: calc(600px/10);
+		height: 10vh;
+		background-color: rgb(102, 179, 255);
+		color: white;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		text-align: center;
+	}
+
+	.accept:hover {
+		background-color: white;
+		color:rgb(102, 179, 255);
+	}
+ 	.dec {
+ 		background-color: red;
+ 	}
 	label.close {
 		position: absolute;
 		right: 5px;
@@ -457,5 +523,6 @@
 		border-right-style: solid;
 		border-color: white;
 		border-width: 0.1px;
+		text-align: center;
 	}
 </style>

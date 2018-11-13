@@ -1,15 +1,19 @@
 <template>
 	<div class="main">
-		<form v-on:submit.prevent="auth">
+		<form v-on:submit.prevent="auth" v-if="!authed">
 			<label style="position: absolute; top: 10%">Авторизация</label>
 			<label class="po">Логин</label>
-			<input type="text" class="text" v-model="user.login">
+			<input type="text" class="text" v-model="user.login" id="login" v-on:change="compare">
 			<label class="po">Пароль</label>
 			<input type="password" class="text" v-model="user.pass">
 			<div style="margin-top: 10px; font-size: 1rem">{{ warning }}</div>
-			<input type="submit" class="submit">
-
+			<input type="submit" class="submit" v-bind:disabled="user.dis" id="submit">
 			<nuxt-link to="/reg" class="reg">Регистрация</nuxt-link>
+		</form>
+		<form v-else v-on:submit.prevent="logout">
+			<label class="po">Вы вошли как {{ message }}</label>
+			<nuxt-link to="/entered" class="reg">Продолжить работу</nuxt-link>
+			<input type="submit" class="submit" value="Выйти" style="background-color: rgba(255, 102, 102, 0.5)">
 		</form>
 	</div>
 </template>
@@ -19,11 +23,42 @@ import axios from 'axios'
 export default {
 	data(){
 		return {
-			user: {},
-			warning: ''
+			user: {
+				dis: false
+			},
+			warning: '',
+			authed: false,
+			message: ''
 		}	
 	},
 	methods: {
+		logout(){
+			this.$cookies.set('token', '');
+			this.check()
+		},
+		async check(){
+			try{
+				var query = await axios.post('https://asterisk.svo.kz/dom/check', {token: this.$cookies.get('token')});
+				this.authed = true;
+				this.message = query.data;
+			} catch(e){
+				this.authed = false;
+			}
+		},
+		async compare(){
+			try{
+				var query = await axios.post('https://asterisk.svo.kz/dom/compare', {login: this.user.login})
+				if(query.status == 200){
+					document.getElementById('login').style.backgroundColor = "rgba(51, 255, 173, 0.5)";
+					document.getElementById('submit').style.backgroundColor = "rgba(51, 255, 173, 0.5)";
+					this.user.dis = false;
+				}
+			} catch(e){
+				this.user.dis = true;
+				document.getElementById('submit').style.backgroundColor = "rgba(255, 102, 102, 0.5)";
+				document.getElementById('login').style.backgroundColor = "rgba(255, 102, 102, 0.5)";
+			}
+		},
 		async auth(){
 			var query = await axios.post('https://asterisk.svo.kz/dom/login', this.user)
 			if(query.status==200){
@@ -35,7 +70,7 @@ export default {
 		}
 	},
 	mounted(){
-
+		this.check();
 	}
 }
 </script>

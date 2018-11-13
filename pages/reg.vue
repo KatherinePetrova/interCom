@@ -3,13 +3,13 @@
 		<form v-on:submit.prevent="reg">
 			<label style="position: absolute; top: 10%">Регистрация</label>
 			<label class="po">Логин</label>
-			<input type="text" class="text" required v-model="user.login">
+			<input type="text" class="text" required v-model="user.login" id="login" v-on:change="compare">
 			<label class="po">Пароль</label>
 			<input type="password" class="text" required v-model="user.pass">
 			<label class="po">Почта</label>
 			<input type="email" class="text" required v-model="user.email">
 			<div style="margin-top: 10px; font-size: 1rem">{{ warning }}</div>
-			<input type="submit" class="submit">
+			<input type="submit" class="submit" id="submit" v-bind:disabled="user.dis">
 			<nuxt-link to="/" class="reg">Авторизация</nuxt-link>
 		</form>
 	</div>
@@ -20,11 +20,27 @@ import axios from 'axios'
 export default {
 	data(){
 		return {
-			user: {},
+			user: {
+				dis: false
+			},
 			warning: ''
 		}	
 	},
 	methods: {
+		async compare(){
+			try{
+				var query = await axios.post('https://asterisk.svo.kz/dom/compare', {login: this.user.login})
+				if(query.status == 200){
+					document.getElementById('submit').style.backgroundColor = "rgba(255, 102, 102, 0.5)";
+					document.getElementById('login').style.backgroundColor = "rgba(255, 102, 102, 0.5)";
+					this.user.dis = true;
+				}
+			} catch(e){
+				document.getElementById('login').style.backgroundColor = "rgba(51, 255, 173, 0.5)";
+				document.getElementById('submit').style.backgroundColor = "rgba(51, 255, 173, 0.5)";
+				this.user.dis = false;
+			}
+		},
 		async reg(){
 			var query = await axios.post('https://asterisk.svo.kz/dom/new', this.user);
 			if(query.status == 200){
