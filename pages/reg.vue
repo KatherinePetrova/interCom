@@ -1,15 +1,16 @@
 <template>
 	<div class="main">
-		<form v-on:submit.prevent="auth">
-			<label style="position: absolute; top: 10%">Авторизация</label>
+		<form v-on:submit.prevent="reg">
+			<label style="position: absolute; top: 10%">Регистрация</label>
 			<label class="po">Логин</label>
-			<input type="text" class="text" v-model="user.login">
+			<input type="text" class="text" required v-model="user.login">
 			<label class="po">Пароль</label>
-			<input type="password" class="text" v-model="user.pass">
+			<input type="password" class="text" required v-model="user.pass">
+			<label class="po">Почта</label>
+			<input type="email" class="text" required v-model="user.email">
 			<div style="margin-top: 10px; font-size: 1rem">{{ warning }}</div>
 			<input type="submit" class="submit">
-
-			<nuxt-link to="/reg" class="reg">Регистрация</nuxt-link>
+			<nuxt-link to="/" class="reg">Авторизация</nuxt-link>
 		</form>
 	</div>
 </template>
@@ -24,11 +25,10 @@ export default {
 		}	
 	},
 	methods: {
-		async auth(){
-			var query = await axios.post('https://asterisk.svo.kz/dom/login', this.user)
-			if(query.status==200){
-				this.$cookies.set('token', query.data);
-				this.$router.push('/entered');
+		async reg(){
+			var query = await axios.post('https://asterisk.svo.kz/dom/new', this.user);
+			if(query.status == 200){
+				this.$router.push('/')
 			} else {
 				this.warning = query.message;
 			}
