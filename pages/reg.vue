@@ -72,7 +72,7 @@ export default {
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		background-color: rgb(51, 51, 51);
+		background-color: white;
 		font-family: 'Noto Serif', serif;
 	}
 	form {

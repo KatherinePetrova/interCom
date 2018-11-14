@@ -18,7 +18,7 @@
 				</select>
 				<label class="new">Мастер</label>
 				<select class="new" v-model="new_app.data.masterid" required>
-					<option v-for="item in masters" v-if="item.status==1" :value="item.id">{{item.name}}</option>
+					<option v-for="item in masters" v-if="item.status==1 && item.acceptance==1 && item.deactivation==0" :value="item.id">{{item.name}}</option>
 				</select>
 				<input type="submit" class="sub">
 			</form>
@@ -71,8 +71,11 @@
 				<div class="col">
 					{{ pName(item.problemstatus) }}
 				</div>
-				<div class="col">
+				<div class="col" v-if="item.statusorder!=4">
 					{{ sName(item.statusorder) }}
+				</div>
+				<div class="col" v-else>
+					<div class="accept" style="width: 100%; height: 100%" @click="new_app.data=item; new_app.open=true">Переотправить заявку</div>
 				</div>
 			</div>
 		</div>
@@ -95,15 +98,18 @@
 				<div class="col">
 					{{ item.phone }}
 				</div>
-				<div class="col" v-if="item.status==0 && item.acceptance==1">
+				<div class="col" v-if="item.status==0 && item.acceptance==1 && item.deactivation==0">
 					Занят
 				</div>
-				<div class="col" v-else-if="item.status==1 && item.acceptance==1">
+				<div class="col" v-else-if="item.status==1 && item.acceptance==1 && item.deactivation==0">
 					Свободен
 				</div>
-				<div class="col" v-else-if="item.acceptance==0">
+				<div class="col" v-else-if="item.acceptance==0 && item.deactivation==0">
 					<div class="accept" @click="accept(item, true)">Принять</div>
 					<div class="accept dec" @click="accept(item, false)">Отклонить</div>
+				</div>
+				<div class="col" v-else-if="item.deactivation==1">
+					Деактивирован
 				</div>
 			</div>
 		</div>
@@ -524,5 +530,6 @@
 		border-color: white;
 		border-width: 0.1px;
 		text-align: center;
+		word-break: break-all; 
 	}
 </style>
